@@ -1,14 +1,27 @@
 import httpStatus from 'http-status';
+import { JwtPayload } from 'jsonwebtoken';
 import { SortOrder } from 'mongoose';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import AppError from '../../errors/AppError';
 import { IGenericResponse, IPaginationOptions } from '../../interface/common';
+import { User } from '../user/user.model';
 import { PRODUCT_SEARCHABLE } from './product.constant';
 import { TProduct, TProductFilters } from './product.interface';
 import { Product } from './product.model';
 
-const createProductService = async (payload: TProduct) => {
-  const result = await Product.create(payload);
+const createProductService = async (payload: TProduct, user: JwtPayload) => {
+  const existingUser = await User.findOne({
+    email: user?.email,
+  });
+  if (!existingUser) {
+    throw new AppError(httpStatus.NOT_FOUND, 'This user is not found!');
+  }
+
+  payload.seller = existingUser?._id;
+
+  const result = (await Product.create(payload)).populate({
+    path: 'seller',
+  });
 
   return result;
 };

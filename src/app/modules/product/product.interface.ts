@@ -1,3 +1,5 @@
+import { Types } from 'mongoose';
+
 export type TCompatibility = 'Windows' | 'Mac Os' | 'Linux' | 'Others';
 export type TInterface = 'USB' | 'HDMI' | 'Thunderbolt' | 'Others';
 export type TCondition = 'New' | 'Used';
@@ -14,6 +16,7 @@ export type TProduct = {
   capacity?: string;
   color: string;
   formFactor: string;
+  seller: Types.ObjectId;
 };
 
 export type TProductFilters = {

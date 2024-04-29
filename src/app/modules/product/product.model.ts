@@ -45,6 +45,10 @@ const productSchema = new Schema<TProduct>(
     formFactor: {
       type: String,
     },
+    seller: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
   },
   {
     timestamps: true,
