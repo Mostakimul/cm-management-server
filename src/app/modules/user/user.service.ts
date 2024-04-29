@@ -2,12 +2,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import httpStatus from 'http-status';
-import mongoose from 'mongoose';
 import AppError from '../../errors/AppError';
 import { TUser } from './user.interface';
 import { User } from './user.model';
 
-const createUserService = async (payload: TUser) => {
+const createAdminService = async (payload: TUser) => {
   // * Check if user already exist
   const isUserExist = await User.isUserExistsByEmail(payload.email);
 
@@ -16,26 +15,55 @@ const createUserService = async (payload: TUser) => {
     throw new AppError(httpStatus.NOT_FOUND, 'User already exist!');
   }
 
-  const session = await mongoose.startSession();
+  payload.role = 'admin';
 
-  try {
-    session.startTransaction();
-
-    const newUser = await User.create([payload], { session });
-    if (!newUser.length) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create new user!');
-    }
-
-    await session.commitTransaction();
-    await session.endSession();
-
-    return newUser[0];
-  } catch (error) {
-    await session.abortTransaction();
-    await session.endSession();
-    throw new Error('Failed to create user!');
+  const result = await User.create(payload);
+  if (!result) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create new user!');
   }
+
+  return result;
+};
+
+const createBuyerService = async (payload: TUser) => {
+  // * Check if user already exist
+  const isUserExist = await User.isUserExistsByEmail(payload.email);
+
+  // * Show error if user exist
+  if (isUserExist) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User already exist!');
+  }
+
+  payload.role = 'buyer';
+
+  const result = await User.create(payload);
+  if (!result) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create new buyer!');
+  }
+
+  return result;
+};
+
+const createSellerService = async (payload: TUser) => {
+  // * Check if user already exist
+  const isUserExist = await User.isUserExistsByEmail(payload.email);
+
+  // * Show error if user exist
+  if (isUserExist) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User already exist!');
+  }
+
+  payload.role = 'seller';
+
+  const result = await User.create(payload);
+  if (!result) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create new buyer!');
+  }
+
+  return result;
 };
 export const UserServices = {
-  createUserService,
+  createAdminService,
+  createBuyerService,
+  createSellerService,
 };

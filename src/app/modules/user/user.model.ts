@@ -3,6 +3,7 @@
 import bcrypt from 'bcrypt';
 import { Schema, model } from 'mongoose';
 import config from '../../config';
+import { USER_ROLE } from './user.constant';
 import { TUser, UserModel } from './user.interface';
 
 const userSchema = new Schema<TUser, UserModel>(
@@ -19,8 +20,8 @@ const userSchema = new Schema<TUser, UserModel>(
     },
     role: {
       type: String,
-      enum: ['user'],
-      default: 'user',
+      enum: [USER_ROLE.admin, USER_ROLE.buyer, USER_ROLE.seller],
+      required: true,
     },
     status: {
       type: String,

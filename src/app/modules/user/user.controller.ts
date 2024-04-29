@@ -6,16 +6,40 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { UserServices } from './user.service';
 
-const createUser = catchAsync(async (req, res, next) => {
-  const result = await UserServices.createUserService(req.body);
+const createAdmin = catchAsync(async (req, res) => {
+  const result = await UserServices.createAdminService(req.body);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'User created successfully',
+    message: 'Admin created successfully',
+    data: result,
+  });
+});
+
+const createBuyer = catchAsync(async (req, res) => {
+  const result = await UserServices.createBuyerService(req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Buyer created successfully',
+    data: result,
+  });
+});
+
+const createSeller = catchAsync(async (req, res) => {
+  const result = await UserServices.createSellerService(req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Seller created successfully',
     data: result,
   });
 });
 export const UserController = {
-  createUser,
+  createAdmin,
+  createBuyer,
+  createSeller,
 };

@@ -5,7 +5,7 @@ import { USER_ROLE } from './user.constant';
 export interface TUser {
   email: string;
   password: string;
-  role: 'user';
+  role: string;
   status: 'in-progress' | 'blocked';
   isDeleted: boolean;
 }
