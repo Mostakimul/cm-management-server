@@ -51,10 +51,13 @@ const createProduct = catchAsync(async (req, res) => {
   });
 });
 
-const bulkdeleteProduct = catchAsync(async (req, res, next) => {
+const bulkdeleteProduct = catchAsync(async (req, res) => {
   const productIds = req.body.productIds;
 
-  const result = await ProductServices.bulkdeleteProductsService(productIds);
+  const result = await ProductServices.bulkdeleteProductsService(
+    productIds,
+    req.user,
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -63,8 +66,12 @@ const bulkdeleteProduct = catchAsync(async (req, res, next) => {
     data: result,
   });
 });
-const deleteProduct = catchAsync(async (req, res, next) => {
-  const result = await ProductServices.deleteProductService(req.params.id);
+
+const deleteProduct = catchAsync(async (req, res) => {
+  const result = await ProductServices.deleteProductService(
+    req.params.id,
+    req.user,
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -78,7 +85,11 @@ const updateProduct = catchAsync(async (req, res) => {
   const id = req.params.id;
   const updatedData = req.body;
 
-  const result = await ProductServices.updateProductService(id, updatedData);
+  const result = await ProductServices.updateProductService(
+    id,
+    updatedData,
+    req.user,
+  );
 
   sendResponse(res, {
     success: true,

@@ -26,11 +26,24 @@ const createProductService = async (payload: TProduct, user: JwtPayload) => {
   return result;
 };
 
-const deleteProductService = async (productId: string) => {
+const deleteProductService = async (productId: string, user: JwtPayload) => {
   const isProductExist = await Product.findById(productId);
-
   if (!isProductExist) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Product does not exist!');
+  }
+
+  const existingUser = await User.findOne({
+    email: user?.email,
+  });
+  if (!existingUser) {
+    throw new AppError(httpStatus.NOT_FOUND, 'This user is not found!');
+  }
+
+  if (isProductExist.seller !== existingUser._id) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      'You are not seller of this product!',
+    );
   }
 
   const result = await Product.deleteOne({ _id: productId });
@@ -41,11 +54,25 @@ const deleteProductService = async (productId: string) => {
 const updateProductService = async (
   id: string,
   payload: Partial<TProduct>,
+  user: JwtPayload,
 ): Promise<TProduct | null> => {
-  const isExist = await Product.findOne({ _id: id });
-
-  if (!isExist) {
+  const isProductExist = await Product.findOne({ _id: id });
+  if (!isProductExist) {
     throw new AppError(httpStatus.NOT_FOUND, 'Product not found');
+  }
+
+  const existingUser = await User.findOne({
+    email: user?.email,
+  });
+  if (!existingUser) {
+    throw new AppError(httpStatus.NOT_FOUND, 'This user is not found!');
+  }
+
+  if (isProductExist.seller !== existingUser._id) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      'You are not seller of this product!',
+    );
   }
 
   const result = await Product.findOneAndUpdate({ _id: id }, payload, {
@@ -113,18 +140,35 @@ const getSingleProductService = async (
   return result;
 };
 
-const bulkdeleteProductsService = async (productIds: string[]) => {
+const bulkdeleteProductsService = async (
+  productIds: string[],
+  user: JwtPayload,
+) => {
   const deletedProductIds = [];
+
+  const existingUser = await User.findOne({
+    email: user?.email,
+  });
+  if (!existingUser) {
+    throw new AppError(httpStatus.NOT_FOUND, 'This user is not found!');
+  }
 
   for (const productId of productIds) {
     const isProductExist = await Product.findById(productId);
-
     if (!isProductExist) {
       throw new AppError(
         httpStatus.BAD_REQUEST,
         `Product ID:${productId} does not exist!`,
       );
     }
+
+    if (isProductExist.seller !== existingUser._id) {
+      throw new AppError(
+        httpStatus.UNAUTHORIZED,
+        'You are not seller of this product!',
+      );
+    }
+
     const result = await Product.deleteOne({ _id: productId });
 
     if (result.acknowledged === true) {
