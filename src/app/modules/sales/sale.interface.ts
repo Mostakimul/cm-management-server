@@ -7,6 +7,7 @@ export type TSale = {
   buyerName: string;
   date: Date;
   totalAmount: number;
+  seller: Types.ObjectId;
 };
 
 export type SaleModel = Model<TSale, Record<string, unknown>>;

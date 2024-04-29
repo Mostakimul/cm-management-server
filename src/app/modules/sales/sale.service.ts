@@ -1,19 +1,39 @@
 import httpStatus from 'http-status';
+import { JwtPayload } from 'jsonwebtoken';
 import mongoose, { SortOrder } from 'mongoose';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import AppError from '../../errors/AppError';
 import { IGenericResponse, IPaginationOptions } from '../../interface/common';
 import { Product } from '../product/product.model';
+import { USER_ROLE } from '../user/user.constant';
+import { User } from '../user/user.model';
 import { SALE_SEARCHABLE } from './sale.constant';
 import { TSale, TSaleFilters } from './sale.interface';
 import { Sale } from './sale.model';
 
-const createSaleService = async (payload: TSale) => {
+const createSaleService = async (payload: TSale, user: JwtPayload) => {
+  const { ObjectId } = mongoose.Types;
+
+  const existingUser = await User.findOne({
+    email: user?.email,
+  });
+  if (!existingUser) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Seller not found!');
+  }
+
   const { productId, quantity, buyerName, date } = payload;
 
   const isProductExist = await Product.findById(productId);
   if (!isProductExist) {
     throw new AppError(httpStatus.NOT_FOUND, 'Product not found!');
+  }
+
+  // check if product is matched with seller
+  if (!new ObjectId(isProductExist.seller).equals(existingUser._id)) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      'You are not seller of this product!',
+    );
   }
 
   if (quantity > isProductExist.quantity) {
@@ -44,6 +64,7 @@ const createSaleService = async (payload: TSale) => {
       buyerName,
       date,
       totalAmount: quantity * isProductExist.price,
+      seller: existingUser._id,
     };
 
     const result = await Sale.create([saleData], { session });
@@ -74,8 +95,23 @@ const createSaleService = async (payload: TSale) => {
 const getAllSaleService = async (
   filters: TSaleFilters,
   payload: IPaginationOptions,
+  user: JwtPayload,
 ): Promise<IGenericResponse<TSale[]>> => {
   const { searchTerm, timeFrame, ...filtersData } = filters;
+
+  const existingUser = await User.findOne({
+    email: user?.email,
+  });
+  if (!existingUser) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+  }
+
+  if (existingUser.role === USER_ROLE.buyer) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      'You do not have sales history, because you are buyer!',
+    );
+  }
 
   const today = new Date();
 
@@ -107,6 +143,12 @@ const getAllSaleService = async (
       $or: SALE_SEARCHABLE.map((field) => ({
         [field]: { $regex: searchTerm, $options: 'i' },
       })),
+    });
+  }
+
+  if (existingUser.role === USER_ROLE.seller) {
+    andConditions.push({
+      seller: existingUser._id,
     });
   }
 

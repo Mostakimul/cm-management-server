@@ -7,7 +7,7 @@ import { SALE_FILTERABLE } from './sale.constant';
 import { SaleServices } from './sale.service';
 
 const createSale = catchAsync(async (req, res) => {
-  const result = await SaleServices.createSaleService(req.body);
+  const result = await SaleServices.createSaleService(req.body, req.user);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -24,6 +24,7 @@ const getAllSale = catchAsync(async (req, res) => {
   const result = await SaleServices.getAllSaleService(
     filters,
     paginationOptions,
+    req.user,
   );
 
   sendResponse(res, {

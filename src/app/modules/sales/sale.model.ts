@@ -7,6 +7,10 @@ export const SaleSchema = new Schema<TSale, SaleModel>(
       type: Schema.Types.ObjectId,
       ref: 'Product',
     },
+    seller: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
     quantity: {
       type: Number,
       required: true,
