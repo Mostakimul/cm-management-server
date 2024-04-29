@@ -14,4 +14,5 @@ export type PurchaseModel = Model<TPurchase, Record<string, unknown>>;
 
 export type TPurchaseFilters = {
   searchTerm?: string;
+  timeFrame?: string;
 };

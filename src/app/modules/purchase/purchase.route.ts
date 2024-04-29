@@ -14,4 +14,10 @@ router.post(
   PurchaseController.createPurchase,
 );
 
+router.get(
+  '/',
+  auth(USER_ROLE.buyer, USER_ROLE.admin),
+  PurchaseController.getAllPurchase,
+);
+
 export const PurchaseRoutes = router;

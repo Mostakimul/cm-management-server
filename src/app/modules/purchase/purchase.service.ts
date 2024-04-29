@@ -1,10 +1,14 @@
 import httpStatus from 'http-status';
 import { JwtPayload } from 'jsonwebtoken';
-import mongoose from 'mongoose';
+import mongoose, { SortOrder } from 'mongoose';
+import { paginationHelpers } from '../../../helpers/paginationHelper';
 import AppError from '../../errors/AppError';
+import { IGenericResponse, IPaginationOptions } from '../../interface/common';
 import { Product } from '../product/product.model';
+import { USER_ROLE } from '../user/user.constant';
 import { User } from '../user/user.model';
-import { TPurchase } from './purchase.interface';
+import { PURCHASE_SEARCHABLE } from './purchase.constant';
+import { TPurchase, TPurchaseFilters } from './purchase.interface';
 import { Purchase } from './purchase.model';
 
 const createPurchaseService = async (payload: TPurchase, user: JwtPayload) => {
@@ -79,110 +83,112 @@ const createPurchaseService = async (payload: TPurchase, user: JwtPayload) => {
   return newPurchaseData;
 };
 
-// const getAllSaleService = async (
-//   filters: TSaleFilters,
-//   payload: IPaginationOptions,
-//   user: JwtPayload,
-// ): Promise<IGenericResponse<TSale[]>> => {
-//   const { searchTerm, timeFrame, ...filtersData } = filters;
+const getAllPurchaseService = async (
+  filters: TPurchaseFilters,
+  payload: IPaginationOptions,
+  user: JwtPayload,
+): Promise<IGenericResponse<TPurchase[]>> => {
+  const { searchTerm, timeFrame, ...filtersData } = filters;
 
-//   const existingUser = await User.findOne({
-//     email: user?.email,
-//   });
-//   if (!existingUser) {
-//     throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
-//   }
+  const existingUser = await User.findOne({
+    email: user?.email,
+  });
+  if (!existingUser) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+  }
 
-//   if (existingUser.role === USER_ROLE.buyer) {
-//     throw new AppError(
-//       httpStatus.UNAUTHORIZED,
-//       'You do not have sales history, because you are buyer!',
-//     );
-//   }
+  if (existingUser.role === USER_ROLE.seller) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      'You do not have purchase history, because you are seller!',
+    );
+  }
 
-//   const today = new Date();
+  const today = new Date();
 
-//   let startTime;
-//   let endTime;
+  let startTime;
+  let endTime;
 
-//   if (timeFrame === 'daily') {
-//     startTime = today.setHours(0, 0, 0, 0);
-//     endTime = new Date(today);
-//     endTime.setDate(endTime.getDate() + 1);
-//   } else if (timeFrame === 'weekly') {
-//     startTime = new Date(today.setDate(today.getDate() - today.getDay()));
-//     endTime = new Date(today.setDate(today.getDate() + 7));
-//   } else if (timeFrame === 'monthly') {
-//     startTime = new Date(today.getFullYear(), today.getMonth(), 1);
-//     endTime = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-//   } else if (timeFrame === 'yearly') {
-//     startTime = new Date(today.getFullYear(), 0, 1);
-//     endTime = new Date(today.getFullYear() + 1, 0, 0);
-//   }
+  if (timeFrame === 'daily') {
+    startTime = today.setHours(0, 0, 0, 0);
+    endTime = new Date(today);
+    endTime.setDate(endTime.getDate() + 1);
+  } else if (timeFrame === 'weekly') {
+    startTime = new Date(today.setDate(today.getDate() - today.getDay()));
+    endTime = new Date(today.setDate(today.getDate() + 7));
+  } else if (timeFrame === 'monthly') {
+    startTime = new Date(today.getFullYear(), today.getMonth(), 1);
+    endTime = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  } else if (timeFrame === 'yearly') {
+    startTime = new Date(today.getFullYear(), 0, 1);
+    endTime = new Date(today.getFullYear() + 1, 0, 0);
+  }
 
-//   const { page, limit, skip, sortBy, sortOrder } =
-//     paginationHelpers.calculatePagination(payload);
+  const { page, limit, skip, sortBy, sortOrder } =
+    paginationHelpers.calculatePagination(payload);
 
-//   const andConditions = [];
+  const andConditions = [];
 
-//   if (searchTerm) {
-//     andConditions.push({
-//       $or: SALE_SEARCHABLE.map((field) => ({
-//         [field]: { $regex: searchTerm, $options: 'i' },
-//       })),
-//     });
-//   }
+  if (searchTerm) {
+    andConditions.push({
+      $or: PURCHASE_SEARCHABLE.map((field) => ({
+        [field]: { $regex: searchTerm, $options: 'i' },
+      })),
+    });
+  }
 
-//   if (existingUser.role === USER_ROLE.seller) {
-//     andConditions.push({
-//       seller: existingUser._id,
-//     });
-//   }
+  if (existingUser.role === USER_ROLE.buyer) {
+    andConditions.push({
+      buyer: existingUser._id,
+    });
+  }
 
-//   if (timeFrame) {
-//     andConditions.push({
-//       date: {
-//         $gte: startTime,
-//         $lte: endTime,
-//       },
-//     });
-//   }
+  if (timeFrame) {
+    andConditions.push({
+      date: {
+        $gte: startTime,
+        $lte: endTime,
+      },
+    });
+  }
 
-//   if (Object.keys(filtersData).length) {
-//     andConditions.push({
-//       $and: Object.entries(filtersData).map(([field, value]) => ({
-//         [field]: value,
-//       })),
-//     });
-//   }
+  if (Object.keys(filtersData).length) {
+    andConditions.push({
+      $and: Object.entries(filtersData).map(([field, value]) => ({
+        [field]: value,
+      })),
+    });
+  }
 
-//   const sortConditions: { [key: string]: SortOrder } = {};
-//   if (sortBy && sortOrder) {
-//     sortConditions[sortBy] = sortOrder;
-//   }
+  const sortConditions: { [key: string]: SortOrder } = {};
+  if (sortBy && sortOrder) {
+    sortConditions[sortBy] = sortOrder;
+  }
 
-//   const whereConditions =
-//     andConditions.length > 0 ? { $and: andConditions } : {};
+  const whereConditions =
+    andConditions.length > 0 ? { $and: andConditions } : {};
 
-//   const result = await Sale.find(whereConditions)
-//     .sort(sortConditions)
-//     .skip(skip)
-//     .limit(limit)
-//     .populate('seller')
-//     .populate('productId');
+  const result = await Purchase.find(whereConditions)
+    .sort(sortConditions)
+    .skip(skip)
+    .limit(limit)
+    .populate('seller')
+    .populate('product')
+    .populate('buyer');
 
-//   const total = await Sale.countDocuments(whereConditions);
+  const total = await Purchase.countDocuments(whereConditions);
 
-//   return {
-//     meta: {
-//       page,
-//       limit,
-//       total,
-//     },
-//     data: result,
-//   };
-// };
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
 
 export const PurchaseServices = {
   createPurchaseService,
+  getAllPurchaseService,
 };
