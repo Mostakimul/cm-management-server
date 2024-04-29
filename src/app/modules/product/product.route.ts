@@ -32,14 +32,10 @@ router.patch(
   ProductController.updateProduct,
 );
 
-router.delete(
-  '/:id',
-  auth(USER_ROLE.seller, USER_ROLE.admin),
-  ProductController.deleteProduct,
-);
+router.delete('/:id', auth(USER_ROLE.seller), ProductController.deleteProduct);
 router.post(
   '/bulk-delete',
-  auth(USER_ROLE.seller, USER_ROLE.admin),
+  auth(USER_ROLE.seller),
   ProductController.bulkdeleteProduct,
 );
 
