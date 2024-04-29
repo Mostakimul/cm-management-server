@@ -49,7 +49,7 @@ const createSaleService = async (payload: TSale, user: JwtPayload) => {
     const updateProduct = await Product.findOneAndUpdate(
       { _id: productId },
       {
-        quantity,
+        quantity: isProductExist.quantity - quantity,
       },
       { session },
     );
