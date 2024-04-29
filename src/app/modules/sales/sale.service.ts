@@ -84,7 +84,7 @@ const createSaleService = async (payload: TSale, user: JwtPayload) => {
   }
 
   if (newSaleData) {
-    newSaleData = await Sale.findOne({ _id: newSaleData.id })
+    newSaleData = await Sale.findOne({ _id: newSaleData._id })
       .populate('productId')
       .populate('seller');
   }
