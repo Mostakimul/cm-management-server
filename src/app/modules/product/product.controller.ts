@@ -27,6 +27,25 @@ const getAllProduct = catchAsync(async (req, res) => {
   });
 });
 
+const getMyProducts = catchAsync(async (req, res) => {
+  const filters = pick(req.query, PRODUCT_FILTERABLE);
+  const paginationOptions = pick(req.query, paginationFields);
+
+  const result = await ProductServices.getMyProductService(
+    filters,
+    paginationOptions,
+    req.user,
+  );
+
+  sendResponse(res, {
+    success: true,
+    message: 'All my products fetched successfully',
+    data: result.data,
+    meta: result.meta,
+    statusCode: httpStatus.OK,
+  });
+});
+
 const getSingleProduct = catchAsync(async (req, res) => {
   const id = req.params.id;
 
@@ -106,4 +125,5 @@ export const ProductController = {
   getAllProduct,
   getSingleProduct,
   bulkdeleteProduct,
+  getMyProducts,
 };

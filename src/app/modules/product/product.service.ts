@@ -179,6 +179,68 @@ const bulkdeleteProductsService = async (
   return deletedProductIds;
 };
 
+const getMyProductService = async (
+  filters: TProductFilters,
+  payload: IPaginationOptions,
+  user: JwtPayload,
+): Promise<IGenericResponse<TProduct[]>> => {
+  const existingUser = await User.findOne({
+    email: user?.email,
+  });
+  if (!existingUser) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Seller not found!');
+  }
+
+  const { searchTerm, ...filtersData } = filters;
+
+  const { page, limit, skip, sortBy, sortOrder } =
+    paginationHelpers.calculatePagination(payload);
+
+  const andConditions = [];
+
+  if (searchTerm) {
+    andConditions.push({
+      $or: PRODUCT_SEARCHABLE.map((field) => ({
+        [field]: { $regex: searchTerm, $options: 'i' },
+      })),
+    });
+  }
+
+  andConditions.push({ seller: existingUser._id });
+
+  if (Object.keys(filtersData).length) {
+    andConditions.push({
+      $and: Object.entries(filtersData).map(([field, value]) => ({
+        [field]: value,
+      })),
+    });
+  }
+
+  const sortConditions: { [key: string]: SortOrder } = {};
+  if (sortBy && sortOrder) {
+    sortConditions[sortBy] = sortOrder;
+  }
+
+  const whereConditions =
+    andConditions.length > 0 ? { $and: andConditions } : {};
+
+  const result = await Product.find(whereConditions)
+    .sort(sortConditions)
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Product.countDocuments(whereConditions);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
+
 export const ProductServices = {
   createProductService,
   deleteProductService,
@@ -186,4 +248,5 @@ export const ProductServices = {
   getAllProductService,
   getSingleProductService,
   bulkdeleteProductsService,
+  getMyProductService,
 };

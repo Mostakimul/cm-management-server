@@ -12,6 +12,13 @@ router.get(
   auth(USER_ROLE.buyer, USER_ROLE.seller, USER_ROLE.admin),
   ProductController.getAllProduct,
 );
+
+router.get(
+  '/my-products',
+  auth(USER_ROLE.seller),
+  ProductController.getMyProducts,
+);
+
 router.get(
   '/:id',
   auth(USER_ROLE.buyer, USER_ROLE.seller, USER_ROLE.admin),
