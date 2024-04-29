@@ -1,9 +1,10 @@
 import httpStatus from 'http-status';
 import { JwtPayload } from 'jsonwebtoken';
-import { SortOrder } from 'mongoose';
+import mongoose, { SortOrder } from 'mongoose';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import AppError from '../../errors/AppError';
 import { IGenericResponse, IPaginationOptions } from '../../interface/common';
+import { USER_ROLE } from '../user/user.constant';
 import { User } from '../user/user.model';
 import { PRODUCT_SEARCHABLE } from './product.constant';
 import { TProduct, TProductFilters } from './product.interface';
@@ -17,6 +18,10 @@ const createProductService = async (payload: TProduct, user: JwtPayload) => {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found!');
   }
 
+  if (existingUser.role !== USER_ROLE.seller) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'You are not a seller!');
+  }
+
   payload.seller = existingUser?._id;
 
   const result = (await Product.create(payload)).populate({
@@ -27,6 +32,8 @@ const createProductService = async (payload: TProduct, user: JwtPayload) => {
 };
 
 const deleteProductService = async (productId: string, user: JwtPayload) => {
+  const { ObjectId } = mongoose.Types;
+
   const isProductExist = await Product.findById(productId);
   if (!isProductExist) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Product does not exist!');
@@ -39,7 +46,7 @@ const deleteProductService = async (productId: string, user: JwtPayload) => {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found!');
   }
 
-  if (isProductExist.seller !== existingUser._id) {
+  if (!new ObjectId(isProductExist.seller).equals(existingUser._id)) {
     throw new AppError(
       httpStatus.UNAUTHORIZED,
       'You are not seller of this product!',
@@ -56,6 +63,8 @@ const updateProductService = async (
   payload: Partial<TProduct>,
   user: JwtPayload,
 ): Promise<TProduct | null> => {
+  const { ObjectId } = mongoose.Types;
+
   const isProductExist = await Product.findOne({ _id: id });
   if (!isProductExist) {
     throw new AppError(httpStatus.NOT_FOUND, 'Product not found');
@@ -68,7 +77,7 @@ const updateProductService = async (
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found!');
   }
 
-  if (isProductExist.seller !== existingUser._id) {
+  if (!new ObjectId(isProductExist.seller).equals(existingUser._id)) {
     throw new AppError(
       httpStatus.UNAUTHORIZED,
       'You are not seller of this product!',
@@ -144,6 +153,7 @@ const bulkdeleteProductsService = async (
   productIds: string[],
   user: JwtPayload,
 ) => {
+  const { ObjectId } = mongoose.Types;
   const deletedProductIds = [];
 
   const existingUser = await User.findOne({
@@ -162,7 +172,7 @@ const bulkdeleteProductsService = async (
       );
     }
 
-    if (isProductExist.seller !== existingUser._id) {
+    if (!new ObjectId(isProductExist.seller).equals(existingUser._id)) {
       throw new AppError(
         httpStatus.UNAUTHORIZED,
         'You are not seller of this product!',
