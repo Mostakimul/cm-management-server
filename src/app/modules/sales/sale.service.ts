@@ -84,9 +84,9 @@ const createSaleService = async (payload: TSale, user: JwtPayload) => {
   }
 
   if (newSaleData) {
-    newSaleData = await Sale.findOne({ _id: newSaleData.id }).populate({
-      path: 'productId',
-    });
+    newSaleData = await Sale.findOne({ _id: newSaleData.id })
+      .populate('productId')
+      .populate('seller');
   }
 
   return newSaleData;
@@ -180,7 +180,9 @@ const getAllSaleService = async (
   const result = await Sale.find(whereConditions)
     .sort(sortConditions)
     .skip(skip)
-    .limit(limit);
+    .limit(limit)
+    .populate('seller')
+    .populate('productId');
 
   const total = await Sale.countDocuments(whereConditions);
 
