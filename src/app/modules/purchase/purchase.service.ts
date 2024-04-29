@@ -90,6 +90,8 @@ const getAllPurchaseService = async (
 ): Promise<IGenericResponse<TPurchase[]>> => {
   const { searchTerm, timeFrame, ...filtersData } = filters;
 
+  console.log(timeFrame);
+
   const existingUser = await User.findOne({
     email: user?.email,
   });
@@ -145,7 +147,7 @@ const getAllPurchaseService = async (
 
   if (timeFrame) {
     andConditions.push({
-      date: {
+      purchaseDate: {
         $gte: startTime,
         $lte: endTime,
       },
