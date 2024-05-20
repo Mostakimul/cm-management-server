@@ -20,15 +20,15 @@ router.get(
 );
 
 router.get(
-  '/:id',
-  auth(USER_ROLE.buyer, USER_ROLE.seller, USER_ROLE.admin),
-  ProductController.getSingleProduct,
-);
-
-router.get(
   '/filters',
   auth(USER_ROLE.buyer, USER_ROLE.seller, USER_ROLE.admin),
   ProductController.getProductFilters,
+);
+
+router.get(
+  '/:id',
+  auth(USER_ROLE.buyer, USER_ROLE.seller, USER_ROLE.admin),
+  ProductController.getSingleProduct,
 );
 
 router.post(
