@@ -36,7 +36,21 @@ const getAllSale = catchAsync(async (req, res) => {
   });
 });
 
+const getSingleSale = catchAsync(async (req, res) => {
+  const id = req.params.id;
+
+  const result = await SaleServices.getSingleSaleService(id);
+
+  sendResponse(res, {
+    success: true,
+    message: 'Sale fetched successfully',
+    data: result,
+    statusCode: httpStatus.OK,
+  });
+});
+
 export const SaleController = {
   createSale,
   getAllSale,
+  getSingleSale,
 };

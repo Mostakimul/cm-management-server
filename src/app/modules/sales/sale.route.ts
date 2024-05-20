@@ -15,6 +15,12 @@ router.post(
 );
 
 router.get(
+  '/:id',
+  auth(USER_ROLE.seller, USER_ROLE.admin),
+  SaleController.getSingleSale,
+);
+
+router.get(
   '/',
   auth(USER_ROLE.seller, USER_ROLE.admin),
   SaleController.getAllSale,

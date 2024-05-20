@@ -118,6 +118,17 @@ const updateProduct = catchAsync(async (req, res) => {
   });
 });
 
+const getProductFilters = catchAsync(async (req, res) => {
+  const result = await ProductServices.getAllFiltersService();
+
+  sendResponse(res, {
+    success: true,
+    message: 'Category fetched successfully',
+    data: result,
+    statusCode: httpStatus.OK,
+  });
+});
+
 export const ProductController = {
   createProduct,
   deleteProduct,
@@ -126,4 +137,5 @@ export const ProductController = {
   getSingleProduct,
   bulkdeleteProduct,
   getMyProducts,
+  getProductFilters,
 };

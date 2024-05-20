@@ -9,7 +9,13 @@ export const Compaitbility: TCompatibility[] = [
 export const Interface: TInterface[] = ['USB', 'HDMI', 'Thunderbolt', 'Others'];
 export const Condition: TCondition[] = ['New', 'Used'];
 
-export const PRODUCT_SEARCHABLE = ['name'];
+export const PRODUCT_SEARCHABLE = [
+  'name',
+  'brand',
+  'compatibility',
+  'color',
+  'formFactor',
+];
 
 export const PRODUCT_FILTERABLE = [
   'searchTerm',

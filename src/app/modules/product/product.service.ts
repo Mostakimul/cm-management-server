@@ -94,7 +94,7 @@ const getAllProductService = async (
   filters: TProductFilters,
   payload: IPaginationOptions,
 ): Promise<IGenericResponse<TProduct[]>> => {
-  const { searchTerm, ...filtersData } = filters;
+  const { searchTerm, price, ...filtersData } = filters;
 
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelpers.calculatePagination(payload);
@@ -114,6 +114,14 @@ const getAllProductService = async (
       $and: Object.entries(filtersData).map(([field, value]) => ({
         [field]: value,
       })),
+    });
+  }
+
+  if (price) {
+    andConditions.push({
+      price: {
+        $lte: Number(price),
+      },
     });
   }
 
@@ -251,6 +259,15 @@ const getMyProductService = async (
   };
 };
 
+const getAllFiltersService = async () => {
+  const categories = await Product.distinct('category');
+  const interfaces = await Product.distinct('interface');
+  const conditions = await Product.distinct('condition');
+  const capacity = await Product.distinct('capacity');
+
+  return { categories, interfaces, conditions, capacity };
+};
+
 export const ProductServices = {
   createProductService,
   deleteProductService,
@@ -259,4 +276,5 @@ export const ProductServices = {
   getSingleProductService,
   bulkdeleteProductsService,
   getMyProductService,
+  getAllFiltersService,
 };

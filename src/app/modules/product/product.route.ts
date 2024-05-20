@@ -25,6 +25,12 @@ router.get(
   ProductController.getSingleProduct,
 );
 
+router.get(
+  '/filters',
+  auth(USER_ROLE.buyer, USER_ROLE.seller, USER_ROLE.admin),
+  ProductController.getProductFilters,
+);
+
 router.post(
   '/',
   auth(USER_ROLE.seller),

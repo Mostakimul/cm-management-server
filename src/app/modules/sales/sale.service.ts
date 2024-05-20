@@ -196,7 +196,13 @@ const getAllSaleService = async (
   };
 };
 
+const getSingleSaleService = async (payload: string): Promise<TSale | null> => {
+  const result = await Sale.findById(payload).populate('productId');
+  return result;
+};
+
 export const SaleServices = {
   createSaleService,
   getAllSaleService,
+  getSingleSaleService,
 };
