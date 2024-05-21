@@ -4,6 +4,13 @@
 
 ### API endpoints documentation: https://documenter.getpostman.com/view/16306758/2sA3BuW95Z
 
+### Credentials for admin
+
+```
+email: admin@gmail.com
+password: 12345678
+```
+
 ## How to Run Locally
 
 ### Clone the repository:
