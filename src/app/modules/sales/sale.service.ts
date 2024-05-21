@@ -98,7 +98,7 @@ const getAllSaleService = async (
   user: JwtPayload,
 ): Promise<IGenericResponse<TSale[]>> => {
   const { searchTerm, timeFrame, ...filtersData } = filters;
-
+  const { ObjectId } = mongoose.Types;
   const existingUser = await User.findOne({
     email: user?.email,
   });
@@ -148,7 +148,7 @@ const getAllSaleService = async (
 
   if (existingUser.role === USER_ROLE.seller) {
     andConditions.push({
-      seller: existingUser._id,
+      seller: new ObjectId(existingUser._id).toString(),
     });
   }
 
