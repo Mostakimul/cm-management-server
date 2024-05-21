@@ -90,8 +90,6 @@ const getAllPurchaseService = async (
 ): Promise<IGenericResponse<TPurchase[]>> => {
   const { searchTerm, timeFrame, ...filtersData } = filters;
 
-  console.log(timeFrame);
-
   const existingUser = await User.findOne({
     email: user?.email,
   });
