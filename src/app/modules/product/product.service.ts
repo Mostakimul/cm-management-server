@@ -136,7 +136,8 @@ const getAllProductService = async (
   const result = await Product.find(whereConditions)
     .sort(sortConditions)
     .skip(skip)
-    .limit(limit);
+    .limit(limit)
+    .populate('seller');
 
   const total = await Product.countDocuments(whereConditions);
 
@@ -153,7 +154,7 @@ const getAllProductService = async (
 const getSingleProductService = async (
   payload: string,
 ): Promise<TProduct | null> => {
-  const result = await Product.findById(payload);
+  const result = await Product.findById(payload).populate('seller');
   return result;
 };
 
@@ -245,7 +246,8 @@ const getMyProductService = async (
   const result = await Product.find(whereConditions)
     .sort(sortConditions)
     .skip(skip)
-    .limit(limit);
+    .limit(limit)
+    .populate('seller');
 
   const total = await Product.countDocuments(whereConditions);
 
