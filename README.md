@@ -1,6 +1,6 @@
 ##### Live Link: https://cmu-server.vercel.app/
 
-### Frontend Repo Link: https://github.com/Porgramming-Hero-web-course/l2-b2-assignment-6-fronten-Mostakimul
+### Frontend Repo Link: https://github.com/Mostakimul/cm-management-client
 
 ### API endpoints documentation: https://documenter.getpostman.com/view/16306758/2sA3BuW95Z
 
