@@ -16,7 +16,7 @@ password: 12345678
 ### Clone the repository:
 
 ```
-git clone https://github.com/Porgramming-Hero-web-course/l2-b2-assignment-6-backend-Mostakimul.git
+git clone https://github.com/Mostakimul/cm-management-server.git
 ```
 
 ### Install dependencies:
